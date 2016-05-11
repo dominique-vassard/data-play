@@ -15,6 +15,47 @@ To play, you will need:
 This two sets of procedures requires [Maven](https://maven.apache.org/)<br>
 And install can be long, you've been warned.<br>
 
+## Resources
+You can find documentation about Neo4j [here](http://neo4j.com/docs/developer-manual/current/)
+You can find the very useful CYPHER cheatsheet [here](http://neo4j.com/docs/cypher-refcard/3.0/)
+This two links can also be found in your browser ('Documentation' icon in the left panel)
+
+##Ultra quick introduction to Neo4j
+Neo4j is a graph database, from top to bottom. Every part of it, from storage to processing engine is designed for graph.
+
+###But what is a graph?
+A graph is just a set of node and relationship wich linked nodes with each other.
+![What is a graph?](https://github.com/dominique-vassard/data-play/blob/master/images/whatisagraph.png)  
+A node has at least one label, usually written in CamelCase.
+A node can have properties (ex: name, location, etc.)
+A relationship has one and only one type, usually written in uppercase.
+A relationship can have properties.
+Graph example:  
+![Matrix](https://github.com/dominique-vassard/data-play/blob/master/images/whatisagraph.png)  
+Here we have:
+  * three nodes with the label *Human*
+  * one node with the label *Ship*
+  * on each *Human* node, a property called *name*
+  * one relationship of type *BELIEVED_ID*
+  * one relationship of type *OWNS*
+  * one relationship of type *IS_CAPTAIN_OF*
+  * one relationship of type *IS_CREW_OF*
+  * one relationhip of type *BETRAYS* with a property called *when*
+
+### Cypher
+Cypher, apart from being a traitor, is also the language used to query the Neo4j graph database.  
+It's a mixed between ASCII art and SQL.  
+Nodes are represented like this: (:Label) 
+And relationships like this: -[:TYPE]->  
+Then if you want to get the human whom Morpheus believes in, you'll do:
+```cypher
+MATCH (m:Human)-[:BELIEVES_IN]->(n:Human)
+WHERE m.name = "Morpheus"
+RETURN n
+```
+
+
+This was an ultra quick introduction, check Neo4j documentation ofr more information.
 
 ##A word on existing plays
 ###Velib Stations play (velib_station)
