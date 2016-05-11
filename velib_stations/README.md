@@ -136,3 +136,93 @@ CALL apoc.meta.graph();
  ```
 Yep, this is cool!  
 But now it's time to play!
+
+## Play with data
+
+#####What are the stations in the 13th district?
+ ```cypher
+MATCH (s:Station)-[r:IS_IN_DISTRICT]->(di:District {name:13}) 
+RETURN s, r, di;
+ ```
+
+A pretty straight forward query, we get the *Station* linked to *District* whose name is '13' and return everything that was found.  
+  
+  
+  
+#####What is the distance between two given stations?
+ ```cypher
+MATCH (s:Station {uuid:13035}), (s2:Station {uuid:13008}) 
+RETURN distance(point(s), point(s2));
+ ```
+Again, this is straight forward.  
+`distance` use the nodes longitude and latitude to compute distance (in meters).
+If these values aren't cast to float, `distance` doesn't work!  
+
+
+
+#####What is the distance from one station to all aother station in the same district
+```cypher
+MATCH (s:Station {uuid:13008})-[:IS_IN_DISTRICT]->(di:District),
+(di)<-[:IS_IN_DISTRICT]-(s2:Station)
+RETURN s.uuid, s.name, s2.uuid, s2.name, distance(point(s), point(s2)) AS distance_velib
+ORDER BY distance_velib;
+```
+Let' explain this one.  
+`MATCH (s:Station {uuid:13008})-[:IS_IN_DISTRICT]->(di:District)`  
+For the *Station* with *uuid* equals to 13008, we retrieve the district it's linked to (in a simpler way: we get the *Station*'s *District*).  
+`(di)<-[:IS_IN_DISTRICT]-(s2:Station)`  
+Given this *District* (aliased 'di'), we retrieve all *Station* it's linked to.    
+Now that we have all *Station* in the same *District*, all we need to do is to compute the distance between the found *Station*s and the given one, which is done by:  
+`RETURN s.uuid, s.name, s2.uuid, s2.name, distance(point(s), point(s2)) AS distance_velib`  
+The results are then order using `ORDER BY`.  
+We could add a `LIMIT` clause to get only the closest or the furthest *Station* depending on the `ORDER BY`.  
+
+
+
+#####What is the greatest distance between two closest station?
+Last but not least, an interesting question. We have our dataset with all stations and geo-coordinate and we want to know which closest have the greatest distance between them.  
+It could be interesting to have this information if we wonder where it will be more useful to add a new station.  
+Here is the query:  
+```cypher
+MATCH (s:Station), (s2:Station)
+WHERE s.uuid < s2.uuid
+WITH s, s2, distance(point(s), point(s2)) AS distance_velib
+WITH s, MIN(distance_velib) AS min_dist
+MATCH (s3:Station)
+WHERE distance(point(s), point(s3)) = min_dist
+RETURN s.uuid, s.name, s3.uuid, s3.name, min_dist
+ORDER BY min_dist DESC
+LIMIT 1;
+```
+
+This query is pretty long to run (depending on ypur computer, it could take from 30 to more 150 seconds). Nothing unexpected as we use all of our graph. But I still need to find an optimized one.  
+
+```cypher
+MATCH (s:Station), (s2:Station)
+WHERE s.uuid <> s2.uuid
+```
+First we build all the possible pairs of *Station*
+`WITH s, s2, distance(point(s), point(s2)) AS distance_velib`
+`WITH` is a very handy instruction that acts like: Use these data as start for the reste of the query. Here we'll get the two *Station* and the distance between them
+`WITH s, MIN(distance_velib) AS min_dist`
+And then only keep one of the *Station* and the mininum distance between this *Station* and the closest.  
+Now we need to get the information about these closest *Station*, and here is how to get it:  
+```cypher
+MATCH (s3:Station)
+WHERE distance(point(s), point(s3)) = min_dist
+```
+
+And now, we only have to return the result:
+```cypher
+RETURN s.uuid, s.name, s3.uuid, s3.name, min_dist
+ORDER BY min_dist DESC
+LIMIT 1;
+```
+And here it is, finally!
+```
++-------------------------------------------------------------------------------------------------------+
+| s.uuid | s.name                           | s3.uuid | s3.name                     | min_dist          |
++-------------------------------------------------------------------------------------------------------+
+| 28002  | "28002 - SOLJENITSYNE (PUTEAUX)" | 28001   | "28001 - WALLACE (PUTEAUX)" | 803.5921865410247 |
++-------------------------------------------------------------------------------------------------------+
+```
