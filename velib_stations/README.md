@@ -4,12 +4,6 @@ Bikes are available 24/7 in stations.<br>
 More infos here [Velib](http://en.velib.paris.fr/)<br>
 Stations geographic positions ae open data. So let's play!<br>
 
-##Requirements
-To play, you will need:
-  * neo4j v3.x ([get it](http://neo4j.com/))
-  * neo4j spatial procedures ([download and install infos](http://gist.asciidoctor.org/?dropbox-14493611%2Fcypher_spatial.adoc#_add_layer))
-  * neo4j apoc procedures, which are some must have ([download and install](https://github.com/neo4j-contrib/neo4j-apoc-procedures))
-
 ## About data in the file
 The file contains a csv with the following fields:<br>
  Field name | Description                           | Our usage<br>
@@ -138,3 +132,4 @@ And now (if you installed apoc procedures), you can visualize your meta-graph:
  ```cypher
 CALL apoc.meta.graph();
  ```
+Yep, this is cool!<br>
