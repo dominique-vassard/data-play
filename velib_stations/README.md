@@ -1,36 +1,38 @@
 #Velib stations data play
-Velib is a self-service bike system in Paris (France) and its closest suburbs.<br>
-Bikes are available 24/7 in stations.<br>
-More infos here [Velib](http://en.velib.paris.fr/)<br>
-Stations geographic positions ae open data. So let's play!<br>
+Velib is a self-service bike system in Paris (France) and its closest suburbs.  
+Bikes are available 24/7 in stations.  
+More infos here [Velib](http://en.velib.paris.fr/)  
+Stations geographic positions ae open data. So let's play!  
 
 ## About data in the file
-The file contains a csv with the following fields:<br>
- Field name | Description                           | Our usage<br>
-------------|---------------------------------------|-------------------------------------------------------------------------------------<br>
- number     | The station identifier                | uuid : unique node identifier<br>
- name       | The station name                      | name<br>
- address    | The station address                   | address<br>
- dept       | The station department                | Department<br>
- cp         | The station sip code                  | Used to kwnow wether the station belongs to an district (inside Paris) or not<br>
- ville      | The town where the station is located | Town<br>
- latitude   | The station latitude                  | latitude<br>
- longitude  | The station longitude                 | longitude<br>
- wgs84      | The station WGS84 coordinates (GPS)   | unused<br>
+The file contains a csv with the following fields:  
+ 
+ Field name | Description                           | Our usage  
+------------|---------------------------------------|-------------------------------------------------------------------------------------  
+ number     | The station identifier                | uuid : unique node identifier  
+ name       | The station name                      | name  
+ address    | The station address                   | address  
+ dept       | The station department                | Department  
+ cp         | The station sip code                  | Used to kwnow wether the station belongs to an district (inside Paris) or not  
+ ville      | The town where the station is located | Town  
+ latitude   | The station latitude                  | latitude  
+ longitude  | The station longitude                 | longitude  
+ wgs84      | The station WGS84 coordinates (GPS)   | unused  
 
 ## Import data
-Copy velib_a_paris_et_communes_limitrophes.csv to $NEO4J_PATH/import<br>
-We use the data info file to create station nodes, district nodes, town nodes, department nodes and to link them<br>
-At the end, our database schema will be like this:<br>
-![Schema](https://github.com/dominiquevas/data-play/blob/master/velib_stations/schema.png)<br>
+Copy *velib_a_paris_et_communes_limitrophes.csv* to $NEO4J_PATH/import  
+We use the data info file to create station nodes, district nodes, town nodes, department nodes and to link them  
+At the end, our database schema will be like this:  
+![Schema](https://github.com/dominique-vassard/data-play/blob/master/velib_stations/images/schema.png)  
 We will see later how to generate this metagraph.
 
-Now it's time to import the data.<br>
-Start Neo4j if it's not already the case: $NEO4J_PATH/bin/neo4j start<br>
+
+Now it's time to import the data.  
+Start Neo4j if it's not already the case: $NEO4J_PATH/bin/neo4j start  
 Now you've got two choices:
   * Use the browser at http://localhost/7474
   * Use the shell: $NEO4J_PATH/bin/neo4j-shell
-Choice is all yours, depends if you prefer commande line and ruxtic table or pretty graph.<br>
+Choice is all yours, depends if you prefer commande line and ruxtic table or pretty graph.  
 Choose your weapon!
 
 
@@ -41,8 +43,8 @@ CREATE CONSTRAINT ON (t:Town) ASSERT t.name IS UNIQUE;
 CREATE CONSTRAINT ON (s:Station) ASSERT s.uuid IS UNIQUE;
 CREATE CONSTRAINT ON (di:District) ASSERT d.name IS UNIQUE;
 ```
-In order to make sure that uniqueness is preseve for our nodes.<br>
-Constraints automatically create index on the constrained property.<br>
+In order to make sure that uniqueness is preseve for our nodes.  
+Constraints automatically create indexes on the constrained property.  
 You can list existing constraints with `CALL db.constraints()` and indexes with `CALL db.indexes()`.
 
 
@@ -74,9 +76,8 @@ Let's explain that a litlle bit!
 ```cypher
 USING PERIODIC COMMIT
 ```
-This permits to periodically commit as it says. But why is it useful.<br>
-All transaction work is kept in memory before being committed. This means that without this instruction, all the nodes and relationships we create<br>
-will be stored in memory until process successfully ends.<br>
+This permits to periodically commit as it says. But why is it useful?  
+All transaction work is kept in memory before being committed. This means that without this instruction, all the nodes and relationships we create will be stored in memory until process successfully ends.  
 So, be nice with your RAM and use this instruction.
 
 
@@ -85,9 +86,9 @@ LOAD CSV WITH HEADERS FROM
 'file:/velib_a_paris_et_communes_limitrophes.csv' AS line FIELDTERMINATOR ';'
 WITH line
 ```
-This instruction is pretty clear, just loading a CSV with semi-colon as field separator.<br>
-`file:/` will look into your $NEO4J_PATH/import directory and only there.<br>
-If you want to load a csv from the interwe, you can use `http://`<br>
+This instruction is pretty clear, just loading a CSV with semi-colon as field separator.  
+`file:/` will look into your $NEO4J_PATH/import directory and only there.  
+If you want to load a csv from the interwe, you can use `http://`  
 Ad we will use the data line by line, that's the final line says.
 
 
@@ -96,17 +97,18 @@ MERGE (d:Department {name:line.dept})
 MERGE (t:Town {name:line.ville})
 MERGE (d)<-[:IS_IN_DEPT]-(t)
 ```
-Here we create our first nodes: Department and Town!<br>
-Their names are from file data.<br>
-`MERGE` uses the previoulsy created constraitn and assure the the nodes uniqueness.<br>
-the last `MERGE` links the created Town node to the Department node<br>
+Here we create our first nodes: Department and Town!  
+Their names are from file data.  
+`MERGE` uses the previoulsy created constraint and assure the the nodes uniqueness.  
+the last `MERGE` links the created Town node to the Department node  
 It is a good practice to have nodes label in CamelCase and the relationships type in upper case.
 
 
 ```cypher
 CREATE(s:Station {uuid:toInt(line.number), adress:line.address,name: line.name, latitude:toFloat(line.latitude), longitude:toFloat(line.longitude)})
 ```
-Creates the Station nodes
+Creates the Station nodes.
+All data we get from file are considered to be strings, then it's important to cast them in the right type if needed. Here we cast *longitude* and *latitude* to float to be able to perform specific operation on them.
 
 
 ```cypher
@@ -115,9 +117,9 @@ FOREACH ( x IN (CASE WHEN line.dept = '75' THEN [1] ELSE [] END) |
     MERGE (s)-[:IS_IN_DISTRICT]->(di)
 )
 ```
-There's no `IF` in Cypher then here is the trick: use a `CASE` to fill an array either with a 1 (true) or keep it empty. Then iterate through this array via `FOREACH`.<br>
-Not the easiest way to do a condition...<br>
-With this pseudo-test, if the Station is located in Paris, we create the district if it doesn't exists (and link it to the town) an link the Station to the District.
+There's no `IF` in Cypher then here is the trick: use a `CASE` to fill an array either with a 1 (true) or keep it empty. Then iterate through this array via `FOREACH`.  
+Not the easiest way to do a condition...  
+With this pseudo-test, if the Station is located in Paris, we create the district if it doesn't exists (and link it to the town) and link the Station to the District.
 
 
 ```cypher
@@ -125,11 +127,12 @@ FOREACH ( y IN (CASE WHEN line.dept = '75' THEN [] ELSE [1] END) |
     MERGE (s)-[:IS_IN_TOWN]->(t)
 )
 ```
-As you've surely guess, here is the opposite, we only link the Station to the Town.
+As you've surely guessed, here is the opposite, we only link the Station to the Town.
 
 
 And now (if you installed apoc procedures), you can visualize your meta-graph:
  ```cypher
 CALL apoc.meta.graph();
  ```
-Yep, this is cool!<br>
+Yep, this is cool!  
+But now it's time to play!
