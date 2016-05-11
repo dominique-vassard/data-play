@@ -31,7 +31,7 @@ A node can have properties (ex: name, location, etc.)
 A relationship has one and only one type, usually written in uppercase.
 A relationship can have properties.
 Graph example:  
-![Matrix](https://github.com/dominique-vassard/data-play/blob/master/images/whatisagraph.png)  
+![Matrix](https://github.com/dominique-vassard/data-play/blob/master/images/graph_example.png)  
 Here we have:
   * three nodes with the label *Human*
   * one node with the label *Ship*

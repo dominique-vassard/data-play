@@ -195,15 +195,15 @@ ORDER BY min_dist DESC
 LIMIT 1;
 ```
 
-This query is pretty long to run (depending on ypur computer, it could take from 30 to more 150 seconds). Nothing unexpected as we use all of our graph. But I still need to find an optimized one.  
+This query is pretty long to run (depending on ypur computer, it could take from 30 to more 150 seconds). Nothing unexpected as we use all of our graph.  But I still need to find an optimized query.  
 
 ```cypher
 MATCH (s:Station), (s2:Station)
 WHERE s.uuid <> s2.uuid
 ```
-First we build all the possible pairs of *Station*
-`WITH s, s2, distance(point(s), point(s2)) AS distance_velib`
-`WITH` is a very handy instruction that acts like: Use these data as start for the reste of the query. Here we'll get the two *Station* and the distance between them
+First we build all the possible pairs of *Station*  
+`WITH s, s2, distance(point(s), point(s2)) AS distance_velib`  
+`WITH` is a very handy instruction that acts like: Use these data as start for the reste of the query. Here we'll get the two *Station* and the distance between them.  
 `WITH s, MIN(distance_velib) AS min_dist`
 And then only keep one of the *Station* and the mininum distance between this *Station* and the closest.  
 Now we need to get the information about these closest *Station*, and here is how to get it:  
