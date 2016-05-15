@@ -186,7 +186,10 @@ print "Writes file into " + neo4jDirectory
 
 countries = {}
 
-resOfficers = manageOfficers(directory, neo4jDirectory, countries);
+resIntermediaries = manageIntermediaries(directory, neo4jDirectory, countries);
+addCountryRelationships(neo4jDirectory, resIntermediaries['relToCountry'], 'intermediary');
+
+resOfficers = manageOfficers(directory, neo4jDirectory, countries, resIntermediaries['intermediariesId']);
 addCountryRelationships(neo4jDirectory, resOfficers['relToCountry'], 'officer');
 
 resEntities = manageEntities(directory, neo4jDirectory, countries);
@@ -195,16 +198,16 @@ addCountryRelationships(neo4jDirectory, resEntities['relToCountry'], 'entity');
 resAddresses = manageAddresses(directory, neo4jDirectory, countries);
 addCountryRelationships(neo4jDirectory, resAddresses['relToCountry'], 'address');
 
-resIntermediaries = manageIntermediaries(directory, neo4jDirectory, countries);
-addCountryRelationships(neo4jDirectory, resIntermediaries['relToCountry'], 'intermediary');
 
 
 saveCountries(neo4jDirectory, countries)
 
 manageAllEdges(directory, neo4jDirectory)
 
-# print countries
-
-# ./bin/neo4j-import --into data/graph.db/  --nodes:Officer "../../data_play/panama_papers/./clean_data/Officers_headers --nodes ../../data_play/test_import2.csv
-
-# --nodes:Address "./clean_data/Addresses_headers.csv, ./clean_data/Addresses.csv" --nodes:Country "./clean_data/Countries_headers.csv, ./clean_data/Countries.csv" --nodes:Entity "./clean_data/Entities_headers.csv, ./clean_data/Entities.csv" --nodes:EntityType "./clean_data/EntityTypes_headers.csv, ./clean_data/EntityTypes.csv" --nodes:Intermediary "./clean_data/Intermediaries_headers.csv, ./clean_data/Intermediaries.csv" --nodes:Jurisdiction "./clean_data/Jurisdictions_headers.csv, ./clean_data/Jurisdictions.csv" --nodes:Officer "./clean_data/Officers_headers.csv, ./clean_data/Officers.csv" --nodes:ServiceProvider "./clean_data/ServiceProviders_headers.csv, ./clean_data/ServiceProviders.csv" --relationships "./clean_data/additional_relationships_country_address_headers.csv, ./clean_data/additional_relationships_country_address.csv" --relationships "./clean_data/additional_relationships_country_entity_headers.csv, ./clean_data/additional_relationships_country_entity.csv" --relationships "./clean_data/additional_relationships_country_intermediary_headers.csv, ./clean_data/additional_relationships_country_intermediary.csv" --relationships "./clean_data/additional_relationships_country_officer_headers.csv, ./clean_data/additional_relationships_country_officer.csv" --relationships "./clean_data/additional_relationships_entity_headers.csv, ./clean_data/additional_relationships_entity.csv" --relationships "./clean_data/all_edges_headers.csv, ./clean_data/all_edges.csv"
+#Cypher query to manage duplicate
+# USING PERIODIC COMMIT 500
+# LOAD CSV WITH HEADERS FROM
+# 'file:///panama_papers/duplicateIds.csv' AS line
+# WITH line
+# MATCH (n:Intermediary {uid: line.id})
+# SET n:Officer

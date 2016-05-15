@@ -3,7 +3,8 @@ import csv, os, re
 ######################################################################################################################
 #                                                   OFFICERS                                                         #
 ######################################################################################################################
-def manageOfficers(sourceDir, targetDir, countries):
+# It is possible to haveduplmicate between Officers and Intermediaries
+def manageOfficers(sourceDir, targetDir, countries, intermediariesId):
     """Import and convert data from Officers.csv"""
 
     print "==========> Import and convert data from " + sourceDir + "Officers.csv to " + targetDir + "Officers.csv"
@@ -14,7 +15,9 @@ def manageOfficers(sourceDir, targetDir, countries):
         writer = csv.writer(headers, delimiter = ',')
         writer.writerow(["uid:ID", "name"])
 
-    officerToCountry = {};
+    officerToCountry = {}
+
+    duplicatesId = []
 
     #Manage Officers data
     print "  * Write file"
@@ -35,7 +38,17 @@ def manageOfficers(sourceDir, targetDir, countries):
                     countries[countryCode] = countryName
                     officerToCountry[row['node_id']] = countryCode
 
-                writer.writerow([row['node_id'], row['name']])
+                if (row['node_id'] in intermediariesId):
+                    duplicatesId.append(row['node_id'])
+                else:
+                    writer.writerow([row['node_id'], row['name']])
+
+    #Save duplicate id in a file
+    with open(targetDir + 'duplicateIds.csv', 'wb') as duplicateFile:
+        writer = csv.writer(duplicateFile, delimiter = ',')
+        wrtier.writerow(['id'])
+        for _, duplicateId in enumerate(duplicatesId):
+            writer.writerow([duplicateId])
 
     return {'countries': countries, 'relToCountry': officerToCountry}
 
@@ -208,6 +221,7 @@ def manageIntermediaries(sourceDir, targetDir, countries):
     writeHeaders(targetDir, 'Intermediaries', ['uid:ID', 'name', 'address', 'status'])
 
     intermediaryToCountry = {}
+    intermediariesId = []
 
     #Manage Officers data
     print "  * Write file"
@@ -229,8 +243,9 @@ def manageIntermediaries(sourceDir, targetDir, countries):
                     intermediaryToCountry[row['node_id']] = countryCode
 
                 writer.writerow([row['node_id'], row['name'], row['address'], row['status']])
+                intermediariesId.append(row['node_id'])
 
-    return {'countries': countries, 'relToCountry': intermediaryToCountry}
+    return {'countries': countries, 'relToCountry': intermediaryToCountry, 'intermediariesId': intermediariesId}
 
 ######################################################################################################################
 #                                                   ALL EDGES                                                        #
