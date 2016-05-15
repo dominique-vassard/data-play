@@ -51,7 +51,7 @@ def manageEntities(sourceDir, targetDir, countries):
     #Write headers file
     headers = ['uid:ID', 'name', 'originalName', 'formerName', 'address', 'status', 'note', 'incorporationDate', 'dormancydate', 'inactivationDate', 'struckOffDate']
     writeHeaders(targetDir, 'Entities',                             headers)
-    writeHeaders(targetDir, 'Jurisdictions',                        ['code:ID', 'name'])
+    writeHeaders(targetDir, 'Jurisdictions',                        ['uid:ID', 'code', 'name'])
     writeHeaders(targetDir, 'ServiceProviders',                     ['code:ID', 'name'])
     writeHeaders(targetDir, 'EntityTypes',                          ['uid:ID', 'name'])
     writeHeaders(targetDir, 'additional_relationships_entity',      [':START_ID', ':END_ID', ':TYPE'])
@@ -88,12 +88,13 @@ def manageEntities(sourceDir, targetDir, countries):
                     row['jurisdiction_description'] = 'Undetermined'
 
                 #Manage jurisdictions
+                jurId = 'jur-' + row['jurisdiction']
                 jurisdictions[row['jurisdiction']] = row['jurisdiction_description']
-                additional_relationships.append([row['node_id'], row['jurisdiction'], 'IS_IN_JURISDICTION'])
+                additional_relationships.append([row['node_id'], jurId, 'IS_IN_JURISDICTION'])
 
                 #Manage empty serviceProvider info
                 if row['service_provider'] == '':
-                    spId = 'XXX'
+                    spId = 'sp-XXX'
                     row['service_provider'] = 'Undetermined'
                 else:
                     spId = ''
@@ -107,7 +108,7 @@ def manageEntities(sourceDir, targetDir, countries):
 
                 #Manage empty entity type info
                 if row['company_type'] == '':
-                    typeId = 'XXX'
+                    typeId = 'et-XXX'
                     row['company_type'] = 'Undetermined'
                 else:
                     typeId = ''
@@ -136,7 +137,7 @@ def manageEntities(sourceDir, targetDir, countries):
     with open(targetDir + 'Jurisdictions.csv', 'wb') as jurisdictionFile:
         writer = csv.writer(jurisdictionFile, delimiter = ',')
         for code, description in jurisdictions.items():
-            writer.writerow([code, description])
+            writer.writerow(['jur-' + code, code, description])
 
     # Write serviceProviders file
     print "  * Write file [ServiceProviders]"
