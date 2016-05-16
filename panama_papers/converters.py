@@ -3,9 +3,23 @@ import csv, os, re
 ######################################################################################################################
 #                                                   OFFICERS                                                         #
 ######################################################################################################################
-# It is possible to haveduplmicate between Officers and Intermediaries
+# It is possible to have duplicate between Officers and Intermediaries
 def manageOfficers(sourceDir, targetDir, countries, intermediariesId):
-    """Import and convert data from Officers.csv"""
+    """
+    Import and convert data from Officers.csv
+
+    sourceDir           string          directory where are the source files
+    targetDir           string          directory where will be saved the cleaned files
+    countries           dict            dictionnary of countries
+    intermediariesId    list            List of existing intermediary (if an Officer has the same id as an Intermediary
+                                        it will be saved in a specific file in order to be treat later)
+
+    returns             dict            dictionnary formatted as follow:
+                                        {
+                                            'countries': countries used by Officers,
+                                            'relToCountry': relationships between Officers and Country
+                                        }
+    """
 
     print "==========> Import and convert data from " + sourceDir + "Officers.csv to " + targetDir + "Officers.csv"
 
@@ -46,7 +60,7 @@ def manageOfficers(sourceDir, targetDir, countries, intermediariesId):
     #Save duplicate id in a file
     with open(targetDir + 'duplicateIds.csv', 'wb') as duplicateFile:
         writer = csv.writer(duplicateFile, delimiter = ',')
-        wrtier.writerow(['id'])
+        writer.writerow(['id'])
         for _, duplicateId in enumerate(duplicatesId):
             writer.writerow([duplicateId])
 
@@ -56,7 +70,26 @@ def manageOfficers(sourceDir, targetDir, countries, intermediariesId):
 #                                                   ENTITIES                                                         #
 ######################################################################################################################
 def manageEntities(sourceDir, targetDir, countries):
-    """Import and convert data from Officers.csv"""
+    """
+    Import and convert data from Entities.csv
+
+    Explodes original file in files
+    - Entities_headers.csv / Entities.csv                                               -> Cleaned entities
+    - Jurisdictions_headers.csv / Jurisdictions.csv                                     -> Cleaned jurisdictions
+    - ServiceProviders_headers.csv / ServiceProviders.csv                               -> Cleaned serviceProviders
+    - EntityTypes_headers.csv / EntityTypes.csv                                         -> Cleaned serviceProviders
+    - additional_relationships_entity_headers.csv / additional_relationships_entity.csv -> relationships between Entities and Jurisdictions, serviceProviders, type
+
+    sourceDir           string          directory where are the source files
+    targetDir           string          directory where will be saved the cleaned files
+    countries           dict            dictionnary of countries
+
+    returns             dict            dictionnary formatted as follow:
+                                        {
+                                            'countries': countries used by Entities,
+                                            'relToCountry': relationships between Entities and Country
+                                        }
+    """
 
     print "==========> Import and convert data from " + sourceDir + "Entities.csv to " + targetDir + "Entities.csv"
 
@@ -179,7 +212,19 @@ def manageEntities(sourceDir, targetDir, countries):
 #                                                   ADDRESSSES                                                       #
 ######################################################################################################################
 def manageAddresses(sourceDir, targetDir, countries):
-    """Import and convert data from Addresses.csv"""
+    """
+    Import and convert data from Addresses.csv
+
+    sourceDir           string          directory where are the source files
+    targetDir           string          directory where will be saved the cleaned files
+    countries           dict            dictionnary of countries
+
+    returns             dict            dictionnary formatted as follow:
+                                        {
+                                            'countries': countries used by Addresses,
+                                            'relToCountry': relationships between Addresses and Country
+                                        }
+    """
 
     print "==========> Import and convert data from " + sourceDir + "Addresses.csv to " + targetDir + "Addresses.csv"
 
@@ -214,7 +259,20 @@ def manageAddresses(sourceDir, targetDir, countries):
 #                                                   INTERMEDIARIES                                                   #
 ######################################################################################################################
 def manageIntermediaries(sourceDir, targetDir, countries):
-    """Import and convert data from Intermediaries.csv"""
+    """
+    Import and convert data from Intermediaries.csv
+
+    sourceDir           string          directory where are the source files
+    targetDir           string          directory where will be saved the cleaned files
+    countries           dict            dictionnary of countries
+
+    returns             dict            dictionnary formatted as follow:
+                                        {
+                                            'countries': countries used by Intermediaries,
+                                            'relToCountry': relationships between Intermediary and Country
+                                            'intermediariesId': saved Ids to be used by managOfficers() to avoid duplicates
+                                        }
+    """
 
     print "==========> Import and convert data from " + sourceDir + "Intermediaries.csv to " + targetDir + "Intermediaries.csv"
 
@@ -251,7 +309,12 @@ def manageIntermediaries(sourceDir, targetDir, countries):
 #                                                   ALL EDGES                                                        #
 ######################################################################################################################
 def manageAllEdges(sourceDir, targetDir):
-    """Import and convert data from all_edges.csv"""
+    """
+    Import and convert data from all_edges.csv
+
+    sourceDir           string          directory where are the source files
+    targetDir           string          directory where will be saved the cleaned files
+    """
 
     print "==========> Import and convert data from " + sourceDir + "all_edges.csv to " + targetDir + "all_edges.csv"
 
@@ -270,7 +333,13 @@ def manageAllEdges(sourceDir, targetDir):
 #                                                   COUNTRIES                                                        #
 ######################################################################################################################
 def addCountryRelationships(targetDir, relationshipDefinition, itemType):
-    """Add Node to Country relationship to additional_relationships.csv"""
+    """
+    Add Node to Country relationship to additional_relationships.csv
+
+    targetDir                   string          directory where will be saved the cleaned files
+    relationshipDefinition      dict            relationship between items and Countries
+    itemType                    string          the item type (ex: entity), used for file naming
+    """
 
     print "==========> Add Country relationships"
 
@@ -291,13 +360,18 @@ def addCountryRelationships(targetDir, relationshipDefinition, itemType):
             writer.writerow([source, target, 'IS_IN_COUNTRY'])
 
 def saveCountries(targetDir, countries):
-    """Creates country files"""
+    """
+    Creates country files
+
+    targetDir           string          directory where will be saved the cleaned files
+    countries           dict            dictionnary of countries
+    """
 
     print "==========> Creates country file"
 
     writeHeaders(targetDir, 'Countries', ['code:ID', 'name'])
 
-    print "  * Wrtie file [Countries.csv]"
+    print "  * Write file [Countries.csv]"
     with open(targetDir + 'Countries.csv', 'wb') as file:
         writer = csv.writer(file)
         for code, name in countries.items():
@@ -307,6 +381,13 @@ def saveCountries(targetDir, countries):
 #                                                   USEFUL                                                           #
 ######################################################################################################################
 def writeHeaders(targetDir, filePrefix, headers):
+    """
+    Creates headers files
+
+    targetDir           string          directory where will be saved the cleaned files
+    filePrefix          string          The file prefix (part before '_headers.cscv')
+    headers             list            The headers to save
+    """
     print "  * Create headers for [" + filePrefix + "]"
     with open(targetDir + filePrefix + '_headers.csv', 'wb') as headersFile:
         writer = csv.writer(headersFile, delimiter = ',')
