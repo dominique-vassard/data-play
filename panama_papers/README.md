@@ -113,7 +113,63 @@ node_id | The node id | can be found in node_1 or node_2 field of all_edges.csv 
 sourceID | Indicates the source of information (Offshore Leaks or Panama Papers) | we won't use it
 
 
-Now, we are all set. Let's import ALL the data!
+Now, we are all set. Let's import the data!
 
 ## Import
-Coming very soon (2 days max, but if you're curious enough, the files can talk)  
+First, I wanted to import the data via `LOAD CSV` as the files are all csv.
+It seems there is a problem with all_edges.csv: it isn't possible to dynamically create relationship type. A solution can be to use a `CASE` or even a `FOREACH` to force the relationship type. So, let's have a look on the different relationship in this file. Whoops, there is 121 kind of relationship.
+Well, it seems that `LOAD CSV` is not a good idea...  
+In fact, I imported all other files before seeing this problem. For information, I have to tweak the Java heap size and th queries to import in almost satisyfing 20 minutes. Believe me, I was proud of this 20 minutes. But let's move on to the other solution: `neo4j-import`  
+
+What is `neo4j-import`?  
+The doc about this tool is [here](http://neo4j.com/docs/stable/import-tool.html)  
+It's a tool to import data from CSV files into a blank database. Yep, a blank database and only a blak database, it will send a nerror if you try to use it on a non-empty database. Data sources are separated between nodes and relationships, each stored in CSV files. It is possible to specify a column to use as an Id and format other columns in a particular type if you want. In case of large file, you can have separated file for headers and data, which avoid to edit a large file only to change headers.  
+It's a very quick introduction, I encourage you to read the [doc](http://neo4j.com/docs/stable/import-tool.html).  
+
+Knwowing how `neo4j-import` works, how can we import our data?
+There are few things we ha to keep in mind about the data:
+- There are duplicates between Officers and Intermediaries
+- all_edges.rel_type is not suitable for database as they have special characters and spaces
+Additionnally,extracting countries, jurisdictions, entity types and service providers to create nodes seems to be a good idea.
+Apart from the ICIJ-defined relationships (stored in all_edges.csv), we want the following meta graph:
+
+
+For data cleaning in file creating, I made a python script (my first python script, feel free to improve it and to help becoming better) which yau can call like this:  
+`python convert_data_for_import.py sourceDirectory targetDirectory`
+with *sourceDirectory* the original files directory and *targetDirectory*, the directory where new files will be saved.
+It creates the following files:  
+Addresses_headers.csv
+Addresses.csv
+additional_relationships_country_address_headers.csv
+additional_relationships_country_address.csv
+all_edges_headers.csv
+all_edges.csv
+Countries_headers.csv
+Countries.csv
+Entities_headers.csv
+Entities.csv
+EntityTypes_headers.csv
+EntityTypes.csv
+Jurisdictions_headers.csv
+Jurisdictions.csv
+ServiceProviders_headers.csv
+ServiceProviders.csv
+additional_relationships_entity_jurisdiction_headers.csv
+additional_relationships_entity_jurisdiction.csv
+additional_relationships_entity_headers.csv
+additional_relationships_entity.csv
+additional_relationships_country_entity_headers.csv
+additional_relationships_country_entity.csv
+Intermediaries_headers.csv
+Intermediaries.csv
+additional_relationships_country_intermediary_headers.csv
+additional_relationships_country_intermediary.csv
+Officers_headers.csv
+Officers.csv
+additional_relationships_country_officer_headers.csv
+additional_relationships_country_officer.csv
+duplicateIds.csv
+  
+```
+original error: At /home/dominique.vassard/Dev/perso/panama_papers/clean_data/Addresses.csv:124815 -  there's a field starting with a quote and whereas it ends that quote there seems to be characters in that field after that ending quote. That isn't supported. This is what I read: '11F.-2, No. 102, GUANGFU S. RD., XINYI DISTRICT, Taipei City 110, Taiwan, R.O.C "
+```
