@@ -113,6 +113,9 @@ node_id | The node id | can be found in node_1 or node_2 field of all_edges.csv 
 sourceID | Indicates the source of information (Offshore Leaks or Panama Papers) | we won't use it
 
 
+Don't hesitate to inspect the data, to know exactly what you're about to import. It's better to anticipate problem (format, incorrect data, etc.) before facing import fails.  
+I inspected some of this data, you can check the `inspect_data.py` script if you're curious.
+
 Now, we are all set. Let's import the data!
 
 ## Import
