@@ -23,7 +23,7 @@ The file contains a csv with the following fields:
 Copy *velib_a_paris_et_communes_limitrophes.csv* to $NEO4J_PATH/import  
 We use the data info file to create station nodes, district nodes, town nodes, department nodes and to link them  
 At the end, our database schema will be like this:  
-![Schema](https://github.com/dominique-vassard/data-play/blob/master/velib_stations/images/schema.png)  
+![Schema](https://github.com/dominique-vassard/data-play/blob/master/01_velib_stations/images/schema.png)  
 We will see later how to generate this metagraph.
 
 
