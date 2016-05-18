@@ -62,3 +62,7 @@ This was an ultra quick introduction, check Neo4j documentation ofr more informa
 A play with velib statiob location.<br>
 Velib is a self-service in Paris and its closest suburbs.<br>
 We will extract all stations depending on district/department/town, closest station from a location, the minimum distance between two station of the set, etc.<br>
+
+###Panama Papers
+The ICIJ releases its database leaks about offshore account in Panama.  
+A great dataset with more than 800,000 nodes and 3,000,000 relationships to plya with!
