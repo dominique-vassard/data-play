@@ -463,4 +463,4 @@ CREATE INDEX ON :Intermediary(name);
 
 
 Now we're all good. We can launch the satisfying `CALL apoc.meta.graph()`, enjoy our metagraph:  
-![Schema](https://github.com/dominique-vassard/data-play/blob/master/panama_papers/images/meta_graph.png)
+![Schema](https://github.com/dominique-vassard/data-play/blob/master/02_panama_papers/images/meta_graph.png)
