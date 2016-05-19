@@ -135,7 +135,7 @@ There are few things we ha to keep in mind about the data:
 - all_edges.rel_type is not suitable for database as they have special characters and spaces.  
 Additionnally,extracting countries, jurisdictions, entity types and service providers to create nodes seems to be a good idea.  
 Apart from the ICIJ-defined relationships (stored in all_edges.csv), we want the following meta graph:
-
+![Schema](https://github.com/dominique-vassard/data-play/blob/master/02_panama_papers/images/meta_graph_import.png)
 
 For data cleaning in file creating, I made a python script (my first python script, feel free to improve it and to help becoming better) which yau can call like this:  
 `python convert_data_for_import.py sourceDirectory targetDirectory`  
