@@ -5,6 +5,9 @@ On Monday, the 9th of May, the ICIJ releases the Panama Papers database. As ICIJ
 First, we need the data.
 You can get them from [here](https://offshoreleaks.icij.org/pages/database).  
 If you are too lazy to click a link, you can download using this [official torrent](https://cloudfront-files-1.publicintegrity.org/offshoreleaks/data-csv.zip.torrent#_ga=1.131200970.473767668.1463229349).   
+
+TL;DR? Too lazy to download data and convert them? Just want to perform a simple import? Just unzip the *clean_data/clean_data.zip* and jump to the [Import now!](#import-now) section
+
 And if you're very lazy and/or want to perform a simple import, just read further.
 
 First, have a look to the data
@@ -140,6 +143,7 @@ Apart from the ICIJ-defined relationships (stored in all_edges.csv), we want the
 For data cleaning in file creating, I made a python script (my first python script, feel free to improve it and to help becoming better) which yau can call like this:  
 `python convert_data_for_import.py sourceDirectory targetDirectory`  
 with *sourceDirectory* the original files directory and *targetDirectory*, the directory where new files will be saved.  
+Due to deduplication between **Officer** and **Intermediary**, the script run is a little bit long: around 6 minutes on my computer.
 
 For convenience, the source from which data are retrieved will be noted as source_file.source_field. For example, an information stored in the field 'address' in the file Addresses.csv will be noted: Addresses.address.  
 In file where *coutnry_codes* and *country_names* fields are present, there can be more than one country per line, separated by semi colon. The script split them in single country elements. 
@@ -157,25 +161,7 @@ Contains the **Address** nodes information
 field | source | description
 ---|---|---
 uid | Address.node_id | the node's unique identifier
-description | Address.address | the address
-
-###### additional_relationships_country_address_headers.csv
-Contains the headers for the relationships file between **Address** nodes and **Country** nodes.  
-Contains only one line:
-`:START_ID,:END_ID,:TYPE`  
-These are all keywords:
-- `:START_ID` indicates a start node identifier, here an **Address** one. The import will look after the `:ID` set before to find the correct node  
-- `:END_ID` indicates a target node identifier, here an **Country** one. The import will look after the `:ID` set before to find the correct node
-- `:TYPE` is for the type of relationship to create
-
-###### additional_relationships_country_address.csv
-Contains the relationships between **Address** nodes and **Country** ones.  
-
-field | source | description
----|---|---
-:START_ID | Addresses.node_id | An **Address** node's unique identifier
-:END_ID | Addresses.country_codes | A country code (which acts as an identifier)
-:TYPE | - | The relationship's type. Here: *IS_IN_COUNTRY*  
+description | Address.address | the address 
 
 ###### all_edges_headers.csv
 Contains the headers for the ICIJ-defined relationships.  
@@ -289,24 +275,6 @@ field | source | description
 :END_ID | Entities.jurisdiction | A **Jurisdiction** or **EntityType** or **ServiceProvider** node's unique identifier
 :TYPE | - | The relationship's type. Here: *IS_IN_JURISDICTION* or *IS_OF_TYPE* or *HAS_SERVICE_PROVIDER* 
 
-###### additional_relationships_country_entity_headers.csv
-Contains the headers for the relationships file between **Entity** nodes and **Country** nodes.  
-Contains only one line:
-`:START_ID,:END_ID,:TYPE`  
-These are all keywords:
-- `:START_ID` indicates a start node identifier, here an **Entity** one. 
-- `:END_ID` indicates a target node identifier, here an **Country** one. 
-- `:TYPE` is for the type of relationship to create
-
-###### additional_relationships_country_entity.csv
-Contains the relationships between **Entity** nodes and **Country** ones.  
-
-field | source | description
----|---|---
-:START_ID | Addresses.node_id | An **Entity** node's unique identifier
-:END_ID | Addresses.country_codes | A **Country** node's unique identifier
-:TYPE | - | The relationship's type. Here: *IS_IN_COUNTRY*
-
 ###### Intermediaries_headers.csv
 Contains the headers for the **Intermediary** nodes.  
 Contains only on line:  
@@ -322,24 +290,6 @@ name | Intermediaries.name | The **Intermediary** name
 address | Intermediaries.address | The **Intermediary** address
 status | Intermediaries.status | The **Intermediary** status
 
-###### additional_relationships_country_intermediary_headers.csv
-Contains the headers for the relationships file between **Intermediary** nodes and **Country** nodes.  
-Contains only one line:
-`:START_ID,:END_ID,:TYPE`  
-These are all keywords:
-- `:START_ID` indicates a start node identifier, here an **Intermediary** one. 
-- `:END_ID` indicates a target node identifier, here an **Country** one. 
-- `:TYPE` is for the type of relationship to create
-
-###### additional_relationships_country_intermediary.csv
-Contains the relationships between **Intermediary** nodes and **Country** ones. 
-
-field | source | description
----|---|---
-:START_ID | Addresses.node_id | An **Entity** node's unique identifier
-:END_ID | Addresses.country_codes | A **Country** node's unique identifier
-:TYPE | - | The relationship's type. Here: *IS_IN_COUNTRY*
-
 ###### Officers_headers.csv
 Contains the headers for the **Officer** nodes.  
 Contains only on line:  
@@ -353,21 +303,21 @@ field | source | description
 uid | Officers.node_id | The **Officer** node's unique identifier
 name | Officers.name | The **Officer** name
 
-###### additional_relationships_country_officer_headers.csv
-Contains the headers for the relationships file between **Officer** nodes and **Country** nodes.  
+###### additional_relationships_country_headers.csv
+Contains the headers for the relationships file between **Address** / **Entity** / **Intermediary** / **Officer** nodes and **Country** nodes.  
 Contains only one line:
 `:START_ID,:END_ID,:TYPE`  
 These are all keywords:
-- `:START_ID` indicates a start node identifier, here an **Officer** one. 
+- `:START_ID` indicates a start node identifier, here an **Address** / **Entity** / **Intermediary** / **Officer** one. 
 - `:END_ID` indicates a target node identifier, here an **Country** one. 
 - `:TYPE` is for the type of relationship to create
 
 ###### additional_relationships_country_officer.csv
-Contains the relationships between **Officer** nodes and **Country** ones. 
+Contains the relationships between **Address** / **Entity** / **Intermediary** / **Officer** nodes and **Country** ones. 
 
 field | source | description
 ---|---|---
-:START_ID | Addresses.node_id | An **Officer** node's unique identifier
+:START_ID | Addresses.node_id | An **Address** / **Entity** / **Intermediary** / **Officer** node's unique identifier
 :END_ID | Addresses.country_codes | A **Country** node's unique identifier
 :TYPE | - | The relationship's type. Here: *IS_IN_COUNTRY*
 
@@ -394,10 +344,7 @@ $PATH_TO_NEO4J/bin/neo4j-import --into $PATH_TO_NEO4J/data/databases/graph.db/ -
 --nodes:Jurisdiction "/path/to/your/clean/data/Jurisdictions_headers.csv,/path/to/your/clean/data/Jurisdictions.csv" \
 --nodes:Officer "/path/to/your/clean/data/Officers_headers.csv,/path/to/your/clean/data/Officers.csv" \
 --nodes:ServiceProvider "/path/to/your/clean/data/ServiceProviders_headers.csv,/path/to/your/clean/data/ServiceProviders.csv" \
---relationships "/path/to/your/clean/data/additional_relationships_country_address_headers.csv,/path/to/your/clean/data/additional_relationships_country_address.csv" \
---relationships "/path/to/your/clean/data/additional_relationships_country_entity_headers.csv,/path/to/your/clean/data/additional_relationships_country_entity.csv" \
---relationships "/path/to/your/clean/data/additional_relationships_country_intermediary_headers.csv,/path/to/your/clean/data/additional_relationships_country_intermediary.csv" \
---relationships "/path/to/your/clean/data/additional_relationships_country_officer_headers.csv,/path/to/your/clean/data/additional_relationships_country_officer.csv" \
+--relationships "/path/to/your/clean/data/additional_relationships_country_headers.csv,/path/to/your/clean/data/additional_relationships_country.csv" \
 --relationships "/path/to/your/clean/data/additional_relationships_entity_headers.csv,/path/to/your/clean/data/additional_relationships_entity.csv" \
 --relationships "/path/to/your/clean/data/all_edges_headers.csv,/path/to/your/clean/data/all_edges.csv"
 ```
@@ -435,10 +382,10 @@ That's it! Everything was imported in our database.
 Remember the time required for my not-complete-LOAD-CSV import? About 20 minutes.  
 How long was it for you? Far less I presume and your answers is in seconds. Nice, isn't it?  especially for more than 800,000 nodes and more than 3,000,000 relationships.
 
-But our job isn't finished yet. We have to managed our duplicates. Some **Officer** nodes are also **Intermediary** ones, we stored wich one are concerned in a file. Let's import it:  
+But our work isn't finished yet. We have to managed our duplicates. Some **Officer** nodes are also **Intermediary** ones, we stored wich one are concerned in a file. Let's import it:  
 - First copy your *duplicateIds.csv* file into *$PATH_TO_NEO4J/import/*
 - open your neo4-shell or your brower at localhost:7474
-- Launch the query
+- Launch the query (about 1 min long)
 ```cypher
 USING PERIODIC COMMIT 500
 LOAD CSV WITH HEADERS FROM
@@ -463,4 +410,8 @@ CREATE INDEX ON :Intermediary(name);
 
 
 Now we're all good. We can launch the satisfying `CALL apoc.meta.graph()`, enjoy our metagraph:  
-![Schema](https://github.com/dominique-vassard/data-play/blob/master/02_panama_papers/images/meta_graph.png)
+![Schema](https://github.com/dominique-vassard/data-play/blob/master/02_panama_papers/images/meta_graph.png)  
+
+There's one thing you have to knwo about the tool import: you can specify field type by adding `:type_you_want` after the field name in the headers. But due to the `:ID` that indicates an identifier, it isn't possible to spcify types for identifier. Therefore, there are strings. Due to this,  
+`MATCH (o:Officer {uid:12000001}) RETURN o.uid, o.name` won't work, but  
+`MATCH (o:Officer {uid:'12000001'}) RETURN o.uid, o.name` will.
