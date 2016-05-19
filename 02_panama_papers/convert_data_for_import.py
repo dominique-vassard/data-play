@@ -175,39 +175,36 @@
 
 
 import sys
-from converters import *
+import converters
 # import converters
 
-directory = sys.argv[1]
-neo4jDirectory = sys.argv[2]
+sourceDirectory = sys.argv[1]
+targetDirectory = sys.argv[2]
 
-print "Reads file from " + directory
-print "Writes file into " + neo4jDirectory
+print "Reads file from " + sourceDirectory
+print "Writes file into " + targetDirectory
 
 countries = {}
 
-resIntermediaries = manageIntermediaries(directory, neo4jDirectory, countries);
-addCountryRelationships(neo4jDirectory, resIntermediaries['relToCountry'], 'intermediary');
+# Convert/clean Intermediaries
+resIntermediaries = converters.manageIntermediaries(sourceDirectory, targetDirectory, countries);
+converters.addCountryRelationships(targetDirectory, resIntermediaries['relToCountry']);
 
-resOfficers = manageOfficers(directory, neo4jDirectory, countries, resIntermediaries['intermediariesId']);
-addCountryRelationships(neo4jDirectory, resOfficers['relToCountry'], 'officer');
+# Convert/clean Officers
+resOfficers = converters.manageOfficers(sourceDirectory, targetDirectory, countries, resIntermediaries['intermediariesId']);
+converters.addCountryRelationships(targetDirectory, resOfficers['relToCountry']);
 
-resEntities = manageEntities(directory, neo4jDirectory, countries);
-addCountryRelationships(neo4jDirectory, resEntities['relToCountry'], 'entity');
+# Convert/clean Entities
+resEntities = converters.manageEntities(sourceDirectory, targetDirectory, countries);
+converters.addCountryRelationships(targetDirectory, resEntities['relToCountry']);
 
-resAddresses = manageAddresses(directory, neo4jDirectory, countries);
-addCountryRelationships(neo4jDirectory, resAddresses['relToCountry'], 'address');
+# Convert/clean Addresses
+resAddresses = converters.manageAddresses(sourceDirectory, targetDirectory, countries);
+converters.addCountryRelationships(targetDirectory, resAddresses['relToCountry']);
 
+## Save Country nodes file
+converters.saveCountries(targetDirectory, countries)
 
+# Convert/Clean all_edges file
+converters.manageAllEdges(sourceDirectory, targetDirectory)
 
-saveCountries(neo4jDirectory, countries)
-
-manageAllEdges(directory, neo4jDirectory)
-
-#Cypher query to manage duplicate
-# USING PERIODIC COMMIT 500
-# LOAD CSV WITH HEADERS FROM
-# 'file:///panama_papers/duplicateIds.csv' AS line
-# WITH line
-# MATCH (n:Intermediary {uid: line.id})
-# SET n:Officer

@@ -332,29 +332,26 @@ def manageAllEdges(sourceDir, targetDir):
 ######################################################################################################################
 #                                                   COUNTRIES                                                        #
 ######################################################################################################################
-def addCountryRelationships(targetDir, relationshipDefinition, itemType):
+def addCountryRelationships(targetDir, relationshipDefinition):
     """
     Add Node to Country relationship to additional_relationships.csv
 
     targetDir                   string          directory where will be saved the cleaned files
     relationshipDefinition      dict            relationship between items and Countries
-    itemType                    string          the item type (ex: entity), used for file naming
     """
 
     print "==========> Add Country relationships"
 
-    filePrefix = 'additional_relationships_country_' + itemType
-
     # Create headers file if not exists
-    if False == os.path.isfile(targetDir + filePrefix + '_headers.csv'):
+    if False == os.path.isfile(targetDir + 'additional_relationships_country_headers.csv'):
         print "  * Create headers"
-        with open(targetDir + filePrefix + '_headers.csv', 'wb') as headerFile:
+        with open(targetDir + 'additional_relationships_country_headers.csv', 'wb') as headerFile:
             writer = csv.writer(headerFile, delimiter = ',')
             writer.writerow([':START_ID', ':END_ID', ':TYPE'])
 
     # Add country relationships
     print "  * Write relationhips"
-    with open(targetDir + filePrefix + '.csv', 'wb') as relationhipFile:
+    with open(targetDir + 'additional_relationships_country.csv', 'a') as relationhipFile:
         writer = csv.writer(relationhipFile, delimiter = ',')
         for source, target in relationshipDefinition.items():
             writer.writerow([source, target, 'IS_IN_COUNTRY'])
