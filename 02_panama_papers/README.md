@@ -10,9 +10,15 @@ TL;DR? Too lazy to download data and convert them? Just want to perform a simple
 
 And if you're very lazy and/or want to perform a simple import, just read further.
 
-First, have a look to the data
+##Requirements
+To play, you will need:
+  * neo4j v3.x ([get it](http://neo4j.com/))  
+  * neo4j apoc procedures, which are must have ([download and install](https://github.com/neo4j-contrib/neo4j-apoc-procedures))  
+This two sets of procedures requires [Maven](https://maven.apache.org/)  
+And install can be long, you've been warned.  
 
 ## The data
+First, have a look to the data  
 There are 4 csv files:
 
 - *all_edges.csv* contains all relationships between nodes

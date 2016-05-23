@@ -10,8 +10,7 @@ In each directory, you will find:
 ##Requirements
 To play, you will need:
   * neo4j v3.x ([get it](http://neo4j.com/))
-  * neo4j spatial procedures ([download and install infos](http://gist.asciidoctor.org/?dropbox-14493611%2Fcypher_spatial.adoc#_add_layer))
-  * neo4j apoc procedures, which are must have ([download and install](https://github.com/neo4j-contrib/neo4j-apoc-procedures))<br>
+  * [optional but highly recommended]neo4j apoc procedures, which are must have ([download and install](https://github.com/neo4j-contrib/neo4j-apoc-procedures))<br>
 This two sets of procedures requires [Maven](https://maven.apache.org/)<br>
 And install can be long, you've been warned.<br>
 

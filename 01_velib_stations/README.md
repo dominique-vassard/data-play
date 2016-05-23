@@ -4,6 +4,14 @@ Bikes are available 24/7 in stations.
 More infos here [Velib](http://en.velib.paris.fr/)  
 Stations geographic positions ae open data. So let's play!  
 
+##Requirements
+To play, you will need:
+  * neo4j v3.x ([get it](http://neo4j.com/))  
+  * neo4j spatial procedures ([download and install infos](http://gist.asciidoctor.org/?dropbox-14493611%2Fcypher_spatial.adoc#_add_layer))
+  * neo4j apoc procedures, which are must have ([download and install](https://github.com/neo4j-contrib/neo4j-apoc-procedures))  
+This two sets of procedures requires [Maven](https://maven.apache.org/)  
+And install can be long, you've been warned.  
+
 ## About data in the file
 The file contains a csv with the following fields:  
  
